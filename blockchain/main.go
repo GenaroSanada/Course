@@ -18,7 +18,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
+	//"github.com/davecgh/go-spew/spew"
 	golog "github.com/ipfs/go-log"
 	libp2p "github.com/libp2p/go-libp2p"
 	crypto "github.com/libp2p/go-libp2p-crypto"
@@ -28,6 +28,9 @@ import (
 	pstore "github.com/libp2p/go-libp2p-peerstore"
 	ma "github.com/multiformats/go-multiaddr"
 	gologging "github.com/whyrusleeping/go-logging"
+	"github.com/gorilla/mux"
+	"github.com/davecgh/go-spew/spew"
+	"net/http"
 )
 
 // Block represents each 'item' in the blockchain
@@ -43,9 +46,10 @@ type Block struct {
 
 // todo 添加账户系统后，将发送方和接受方类型改为Account
 type Transaction struct {
-	Amount    int    `json:"amount"`
+	Amount    uint64    `json:"amount"`
 	Recipient string `json:"recipient"`
 	Sender    string `json:"sender"`
+	Data      []byte `json:"data"`
 }
 
 type TxPool struct {
@@ -58,19 +62,34 @@ func NewTxPool() *TxPool {
 	}
 }
 
+
+func (p *TxPool)Clear() bool {
+	if len(p.AllTx) == 0 {
+		return true
+	}
+	p.AllTx = make([]Transaction, 0)
+	return true
+}
+
 // Blockchain is a series of validated Blocks
 type Blockchain struct {
 	Blocks []Block
 	TxPool *TxPool
 }
 
-func (t *Blockchain) NewTransaction(sender string, recipient string, amount int) int {
+func (t *Blockchain) NewTransaction(sender string, recipient string, amount uint64, data []byte) *Transaction {
 	transaction := new(Transaction)
 	transaction.Sender = sender
 	transaction.Recipient = recipient
 	transaction.Amount = amount
-	t.TxPool.AllTx = append(t.TxPool.AllTx, *transaction)
-	return t.LastBlock().Index + 1
+	transaction.Data = data
+
+	return transaction
+}
+
+func (t *Blockchain)addTxPool(tx *Transaction) int {
+	t.TxPool.AllTx = append(t.TxPool.AllTx, *tx)
+	return len(t.TxPool.AllTx)
 }
 
 func (t *Blockchain) LastBlock() Block {
@@ -123,9 +142,9 @@ func makeBasicHost(listenPort int, secio bool, randseed int64) (host.Host, error
 	fullAddr := addr.Encapsulate(hostAddr)
 	log.Printf("I am %s\n", fullAddr)
 	if secio {
-		log.Printf("Now run \"go run main.go -l %d -d %s -secio\" on a different terminal\n", listenPort+1, fullAddr)
+		log.Printf("Now run \"go run main.go -l %d -d %s -secio\" on a different terminal\n", listenPort+2, fullAddr)
 	} else {
-		log.Printf("Now run \"go run main.go -l %d -d %s\" on a different terminal\n", listenPort+1, fullAddr)
+		log.Printf("Now run \"go run main.go -l %d -d %s\" on a different terminal\n", listenPort+2, fullAddr)
 	}
 
 	return basicHost, nil
@@ -218,6 +237,8 @@ func writeData(rw *bufio.ReadWriter) {
 		if len(BlockchainInstance.TxPool.AllTx) > 0 {
 			// todo 添加账户系统后的转账操作，现不做任何操作，仅将未打包交易打包到块中
 			newBlock.Transactions = BlockchainInstance.TxPool.AllTx
+
+			BlockchainInstance.TxPool.Clear()
 		}
 
 		if isBlockValid(newBlock, BlockchainInstance.Blocks[len(BlockchainInstance.Blocks)-1]) {
@@ -231,7 +252,7 @@ func writeData(rw *bufio.ReadWriter) {
 			log.Println(err)
 		}
 
-		spew.Dump(BlockchainInstance.Blocks)
+		//spew.Dump(BlockchainInstance.Blocks)
 
 		mutex.Lock()
 		rw.WriteString(fmt.Sprintf("%s\n", string(bytes)))
@@ -240,6 +261,112 @@ func writeData(rw *bufio.ReadWriter) {
 	}
 
 }
+
+func makeMuxRouter() http.Handler {
+	muxRouter := mux.NewRouter()
+	muxRouter.HandleFunc("/", handleGetBlockchain).Methods("GET")
+	muxRouter.HandleFunc("/block", handleWriteBlock).Methods("POST")  // post请求： 本地产生一个块（若交易池中有交易，则打包进块），并将块信息广播到对端节点 e.g {"Msg": 123}
+	muxRouter.HandleFunc("/txpool", handleWriteTx).Methods("POST")  // post请求： 向本地交易池中放入新的交易  e.g {"From":"0x1","To":"0x2","Value":10000,"Data":"message"}
+	return muxRouter
+}
+
+func handleGetBlockchain(w http.ResponseWriter, r *http.Request) {
+	bytes, err := json.MarshalIndent(BlockchainInstance, "", "  ")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	io.WriteString(w, string(bytes))
+}
+
+type SendTxArgs struct {
+	From     string
+	To       string
+	Value    uint64
+	Data  	 string
+}
+
+func handleWriteTx(w http.ResponseWriter, r *http.Request) {
+	var m SendTxArgs
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&m); err != nil {
+		respondWithJSON(w, r, http.StatusBadRequest, r.Body)
+		return
+	}
+	defer r.Body.Close()
+
+	tx := BlockchainInstance.NewTransaction(m.From, m.To, m.Value, []byte(m.Data))
+	BlockchainInstance.addTxPool(tx)
+
+	respondWithJSON(w, r, http.StatusCreated, tx)
+
+}
+
+type Message struct {
+	Msg int
+}
+
+func handleWriteBlock(w http.ResponseWriter, r *http.Request) {
+	var m Message
+
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&m); err != nil {
+		respondWithJSON(w, r, http.StatusBadRequest, r.Body)
+		return
+	}
+	defer r.Body.Close()
+
+	newBlock := generateBlock(BlockchainInstance.Blocks[len(BlockchainInstance.Blocks)-1], m.Msg)
+
+
+	if len(BlockchainInstance.TxPool.AllTx) > 0 {
+		// todo 添加账户系统后的转账操作，现不做任何操作，仅将未打包交易打包到块中
+		newBlock.Transactions = BlockchainInstance.TxPool.AllTx
+		BlockchainInstance.TxPool.Clear()
+	}
+
+	if isBlockValid(newBlock, BlockchainInstance.Blocks[len(BlockchainInstance.Blocks)-1]) {
+		mutex.Lock()
+		BlockchainInstance.Blocks = append(BlockchainInstance.Blocks, newBlock)
+		mutex.Unlock()
+		spew.Dump(BlockchainInstance.Blocks)
+	}
+
+	respondWithJSON(w, r, http.StatusCreated, newBlock)
+
+}
+
+func respondWithJSON(w http.ResponseWriter, r *http.Request, code int, payload interface{}) {
+	response, err := json.MarshalIndent(payload, "", "  ")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("HTTP 500: Internal Server Error"))
+		return
+	}
+	w.WriteHeader(code)
+	w.Write(response)
+}
+
+
+func run(port int) error {
+	mux := makeMuxRouter()
+	listentPort := strconv.Itoa(port)
+	log.Println("local http server listening on 127.0.0.1:", listentPort)
+	s := &http.Server{
+		Addr:           ":" + listentPort,
+		Handler:        mux,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
+
+	if err := s.ListenAndServe(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 
 func main() {
 	t := time.Now()
@@ -263,8 +390,10 @@ func main() {
 	flag.Parse()
 
 	if *listenF == 0 {
-		log.Fatal("Please provide a port to bind on with -l")
+		log.Fatal("Please provide a peer port to bind on with -l")
 	}
+
+	go run(*listenF+1)
 
 	// Make a host that listens on the given multiaddress
 	ha, err := makeBasicHost(*listenF, *secio, *seed)
