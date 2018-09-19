@@ -32,15 +32,54 @@ import (
 
 // Block represents each 'item' in the blockchain
 type Block struct {
-	Index     int
-	Timestamp string
-	Result       int
-	Hash      string
-	PrevHash  string
+	Index     int `json:"index"`
+	Timestamp string `json:"timestamp"`
+	Result       int `json:"result"`
+	Hash      string `json:"hash"`
+	PrevHash  string `json:"prevhash"`
+	Proof        uint64           `json:"proof"`
+	Transactions []Transaction `json:"transactions"`
+}
+
+// todo 添加账户系统后，将发送方和接受方类型改为Account
+type Transaction struct {
+	Amount    int    `json:"amount"`
+	Recipient string `json:"recipient"`
+	Sender    string `json:"sender"`
+}
+
+type TxPool struct {
+	AllTx     []Transaction
+}
+
+func NewTxPool() *TxPool {
+	return &TxPool{
+		AllTx:   make([]Transaction, 0),
+	}
 }
 
 // Blockchain is a series of validated Blocks
-var Blockchain []Block
+type Blockchain struct {
+	Blocks []Block
+	TxPool *TxPool
+}
+
+func (t *Blockchain) NewTransaction(sender string, recipient string, amount int) int {
+	transaction := new(Transaction)
+	transaction.Sender = sender
+	transaction.Recipient = recipient
+	transaction.Amount = amount
+	t.TxPool.AllTx = append(t.TxPool.AllTx, *transaction)
+	return t.LastBlock().Index + 1
+}
+
+func (t *Blockchain) LastBlock() Block {
+	return t.Blocks[len(t.Blocks)-1]
+}
+
+var BlockchainInstance Blockchain = Blockchain{
+	TxPool : NewTxPool(),
+}
 
 var mutex = &sync.Mutex{}
 
@@ -124,9 +163,9 @@ func readData(rw *bufio.ReadWriter) {
 			}
 
 			mutex.Lock()
-			if len(chain) > len(Blockchain) {
-				Blockchain = chain
-				bytes, err := json.MarshalIndent(Blockchain, "", "  ")
+			if len(chain) > len(BlockchainInstance.Blocks) {
+				BlockchainInstance.Blocks = chain
+				bytes, err := json.MarshalIndent(BlockchainInstance.Blocks, "", "  ")
 				if err != nil {
 
 					log.Fatal(err)
@@ -146,7 +185,7 @@ func writeData(rw *bufio.ReadWriter) {
 		for {
 			time.Sleep(5 * time.Second)
 			mutex.Lock()
-			bytes, err := json.Marshal(Blockchain)
+			bytes, err := json.Marshal(BlockchainInstance.Blocks)
 			if err != nil {
 				log.Println(err)
 			}
@@ -174,20 +213,25 @@ func writeData(rw *bufio.ReadWriter) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		newBlock := generateBlock(Blockchain[len(Blockchain)-1], _result)
+		newBlock := generateBlock(BlockchainInstance.Blocks[len(BlockchainInstance.Blocks)-1], _result)
 
-		if isBlockValid(newBlock, Blockchain[len(Blockchain)-1]) {
+		if len(BlockchainInstance.TxPool.AllTx) > 0 {
+			// todo 添加账户系统后的转账操作，现不做任何操作，仅将未打包交易打包到块中
+			newBlock.Transactions = BlockchainInstance.TxPool.AllTx
+		}
+
+		if isBlockValid(newBlock, BlockchainInstance.Blocks[len(BlockchainInstance.Blocks)-1]) {
 			mutex.Lock()
-			Blockchain = append(Blockchain, newBlock)
+			BlockchainInstance.Blocks = append(BlockchainInstance.Blocks, newBlock)
 			mutex.Unlock()
 		}
 
-		bytes, err := json.Marshal(Blockchain)
+		bytes, err := json.Marshal(BlockchainInstance.Blocks)
 		if err != nil {
 			log.Println(err)
 		}
 
-		spew.Dump(Blockchain)
+		spew.Dump(BlockchainInstance.Blocks)
 
 		mutex.Lock()
 		rw.WriteString(fmt.Sprintf("%s\n", string(bytes)))
@@ -200,9 +244,11 @@ func writeData(rw *bufio.ReadWriter) {
 func main() {
 	t := time.Now()
 	genesisBlock := Block{}
-	genesisBlock = Block{0, t.String(), 0, calculateHash(genesisBlock), ""}
+	genesisBlock = Block{0, t.String(), 0, calculateHash(genesisBlock), "", 100,nil}
 
-	Blockchain = append(Blockchain, genesisBlock)
+	var blocks []Block
+	blocks = append(blocks, genesisBlock)
+	BlockchainInstance.Blocks =  blocks
 
 	// LibP2P code uses golog to log messages. They log with different
 	// string IDs (i.e. "swarm"). We can control the verbosity level for
