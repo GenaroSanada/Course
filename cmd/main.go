@@ -19,6 +19,26 @@ import (
 )
 
 func main() {
+
+	// Parse options from the command line
+	command  := flag.String("c", "", "mode[ \"chain\" or \"account\"]")
+	listenF := flag.Int("l", 0, "wait for incoming connections[chain mode param]")
+	target := flag.String("d", "", "target peer to dial[chain mode param]")
+	secio := flag.Bool("secio", false, "enable secio[chain mode param]")
+	seed := flag.Int64("seed", 0, "set random seed for id generation[chain mode param]")
+	flag.Parse()
+
+
+	if *command == "chain" {
+		runblockchain(listenF, target, seed, secio)
+	}else if *command == "account" {
+		fmt.Println("")
+	}else {
+		flag.Usage()
+	}
+}
+
+func runblockchain(listenF *int, target *string, seed *int64, secio *bool){
 	t := time.Now()
 	genesisBlock := blockchain.Block{}
 	genesisBlock = blockchain.Block{0, t.String(), 0, blockchain.CalculateHash(genesisBlock), "", 100,nil}
@@ -31,13 +51,6 @@ func main() {
 	// string IDs (i.e. "swarm"). We can control the verbosity level for
 	// all loggers with:
 	golog.SetAllLoggers(gologging.INFO) // Change to DEBUG for extra info
-
-	// Parse options from the command line
-	listenF := flag.Int("l", 0, "wait for incoming connections")
-	target := flag.String("d", "", "target peer to dial")
-	secio := flag.Bool("secio", false, "enable secio")
-	seed := flag.Int64("seed", 0, "set random seed for id generation")
-	flag.Parse()
 
 	if *listenF == 0 {
 		log.Fatal("Please provide a peer port to bind on with -l")
