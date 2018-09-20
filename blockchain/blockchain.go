@@ -25,6 +25,8 @@ import (
 	ma "github.com/multiformats/go-multiaddr"
 )
 
+var WalletSuffix string
+
 // Block represents each 'item' in the blockchain
 type Block struct {
 	Index     int `json:"index"`
@@ -36,7 +38,7 @@ type Block struct {
 	Transactions []Transaction `json:"transactions"`
 }
 
-// todo 添加账户系统后，将发送方和接受方类型改为Account
+
 type Transaction struct {
 	Amount    uint64    `json:"amount"`
 	Recipient string `json:"recipient"`

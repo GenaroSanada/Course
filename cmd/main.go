@@ -25,13 +25,14 @@ func main() {
 	command  := flag.String("c", "", "mode[ \"chain\" or \"account\"]")
 	listenF := flag.Int("l", 0, "wait for incoming connections[chain mode param]")
 	target := flag.String("d", "", "target peer to dial[chain mode param]")
+	suffix := flag.String("s", "", "wallet suffix [chain mode param]")
 	secio := flag.Bool("secio", false, "enable secio[chain mode param]")
 	seed := flag.Int64("seed", 0, "set random seed for id generation[chain mode param]")
 	flag.Parse()
 
 
 	if *command == "chain" {
-		runblockchain(listenF, target, seed, secio)
+		runblockchain(listenF, target, seed, secio, suffix)
 	}else if *command == "account" {
 		cli := wallet.WalletCli{}
 		cli.Run()
@@ -40,7 +41,7 @@ func main() {
 	}
 }
 
-func runblockchain(listenF *int, target *string, seed *int64, secio *bool){
+func runblockchain(listenF *int, target *string, seed *int64, secio *bool, suffix *string){
 	t := time.Now()
 	genesisBlock := blockchain.Block{}
 	genesisBlock = blockchain.Block{0, t.String(), 0, blockchain.CalculateHash(genesisBlock), "", 100,nil}
@@ -56,6 +57,12 @@ func runblockchain(listenF *int, target *string, seed *int64, secio *bool){
 
 	if *listenF == 0 {
 		log.Fatal("Please provide a peer port to bind on with -l")
+	}
+
+	if *suffix == "" {
+		log.Println("option param -s miss [you can't send transacion with this node]")
+	}else {
+		blockchain.WalletSuffix = *suffix
 	}
 
 	go rpc.RunHttpServer(*listenF+1)
