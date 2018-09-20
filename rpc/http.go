@@ -74,9 +74,9 @@ func handleWriteBlock(w http.ResponseWriter, r *http.Request) {
 
 
 	if len(blockchain.BlockchainInstance.TxPool.AllTx) > 0 {
-		// todo 添加账户系统后的转账操作，现不做任何操作，仅将未打包交易打包到块中
-		newBlock.Transactions = blockchain.BlockchainInstance.TxPool.AllTx
-		blockchain.BlockchainInstance.TxPool.Clear()
+		blockchain.BlockchainInstance.PackageTx(&newBlock)
+	}else {
+		newBlock.Accounts = blockchain.BlockchainInstance.LastBlock().Accounts
 	}
 
 	if blockchain.IsBlockValid(newBlock, blockchain.BlockchainInstance.Blocks[len(blockchain.BlockchainInstance.Blocks)-1]) {

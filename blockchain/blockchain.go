@@ -36,6 +36,7 @@ type Block struct {
 	PrevHash  string `json:"prevhash"`
 	Proof        uint64           `json:"proof"`
 	Transactions []Transaction `json:"transactions"`
+	Accounts   map[string]uint64  `json:"accounts"`
 }
 
 
@@ -88,6 +89,43 @@ func (t *Blockchain)AddTxPool(tx *Transaction) int {
 
 func (t *Blockchain) LastBlock() Block {
 	return t.Blocks[len(t.Blocks)-1]
+}
+
+
+func (t *Blockchain)PackageTx(newBlock *Block) {
+	(*newBlock).Transactions = t.TxPool.AllTx
+	AccountsMap := t.LastBlock().Accounts
+	for k1, v1 := range AccountsMap {
+		fmt.Println(k1, "--", v1)
+	}
+
+	unusedTx := make([]Transaction,0)
+
+	for _, v := range t.TxPool.AllTx{
+		if value, ok := AccountsMap[v.Sender]; ok {
+			if value < v.Amount{
+				unusedTx = append(unusedTx, v)
+				continue
+			}
+			AccountsMap[v.Sender] = value-v.Amount
+		}
+
+		if value, ok := AccountsMap[v.Recipient]; ok {
+			AccountsMap[v.Recipient] = value + v.Amount
+		}else {
+			AccountsMap[v.Recipient] = v.Amount
+		}
+	}
+
+    t.TxPool.Clear()
+    //余额不够的交易放回交易池
+    if len(unusedTx) > 0 {
+		for _, v := range unusedTx{
+			t.AddTxPool(&v)
+		}
+	}
+
+	(*newBlock).Accounts = AccountsMap
 }
 
 var BlockchainInstance Blockchain = Blockchain{
@@ -145,9 +183,9 @@ func MakeBasicHost(listenPort int, secio bool, randseed int64) (host.Host, error
 	fullAddr := addr.Encapsulate(hostAddr)
 	log.Printf("I am %s\n", fullAddr)
 	if secio {
-		log.Printf("Now run \"go run main.go -l %d -d %s -secio\" on a different terminal\n", listenPort+2, fullAddr)
+		log.Printf("Now run \"go run main.go -c chain -l %d -d %s -secio\" on a different terminal\n", listenPort+2, fullAddr)
 	} else {
-		log.Printf("Now run \"go run main.go -l %d -d %s\" on a different terminal\n", listenPort+2, fullAddr)
+		log.Printf("Now run \"go run main.go -c chain -l %d -d %s\" on a different terminal\n", listenPort+2, fullAddr)
 	}
 
 	return basicHost, nil
@@ -238,10 +276,9 @@ func WriteData(rw *bufio.ReadWriter) {
 		newBlock := GenerateBlock(BlockchainInstance.Blocks[len(BlockchainInstance.Blocks)-1], _result)
 
 		if len(BlockchainInstance.TxPool.AllTx) > 0 {
-			// todo 添加账户系统后的转账操作，现不做任何操作，仅将未打包交易打包到块中
-			newBlock.Transactions = BlockchainInstance.TxPool.AllTx
-
-			BlockchainInstance.TxPool.Clear()
+			BlockchainInstance.PackageTx(&newBlock)
+		}else {
+			newBlock.Accounts = BlockchainInstance.LastBlock().Accounts
 		}
 
 		if IsBlockValid(newBlock, BlockchainInstance.Blocks[len(BlockchainInstance.Blocks)-1]) {
