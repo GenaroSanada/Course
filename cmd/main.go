@@ -9,6 +9,7 @@ import (
 	"log"
 
 	"Course/blockchain"
+	"Course/rpc"
 
 	golog "github.com/ipfs/go-log"
 	peer "github.com/libp2p/go-libp2p-peer"
@@ -56,7 +57,7 @@ func runblockchain(listenF *int, target *string, seed *int64, secio *bool){
 		log.Fatal("Please provide a peer port to bind on with -l")
 	}
 
-	go blockchain.RunHttpServer(*listenF+1)
+	go rpc.RunHttpServer(*listenF+1)
 
 	// Make a host that listens on the given multiaddress
 	ha, err := blockchain.MakeBasicHost(*listenF, *secio, *seed)
