@@ -16,8 +16,7 @@ import (
 	pstore "github.com/libp2p/go-libp2p-peerstore"
 	gologging "github.com/whyrusleeping/go-logging"
 	ma "github.com/multiformats/go-multiaddr"
-
-	"Course/cli"
+	"Course/wallet"
 )
 
 func main() {
@@ -34,7 +33,7 @@ func main() {
 	if *command == "chain" {
 		runblockchain(listenF, target, seed, secio)
 	}else if *command == "account" {
-		cli := cli.CLI{}
+		cli := wallet.WalletCli{}
 		cli.Run()
 	}else {
 		flag.Usage()
