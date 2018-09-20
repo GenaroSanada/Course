@@ -16,6 +16,7 @@ import (
 	gologging "github.com/whyrusleeping/go-logging"
 	ma "github.com/multiformats/go-multiaddr"
 
+	"Course/cli"
 )
 
 func main() {
@@ -32,7 +33,8 @@ func main() {
 	if *command == "chain" {
 		runblockchain(listenF, target, seed, secio)
 	}else if *command == "account" {
-		fmt.Println("")
+		cli := cli.CLI{}
+		cli.Run()
 	}else {
 		flag.Usage()
 	}

@@ -1,10 +1,9 @@
-package main
+package cli
 
 import (
 	"flag"
 	"fmt"
 	"log"
-
 	"os"
 )
 
@@ -43,26 +42,25 @@ func (cli *CLI) Run() {
 	sendTo := sendCmd.String("to", "", "Destination wallet address")
 	sendAmount := sendCmd.Int("amount", 0, "Amount to send")
 	sendMine := sendCmd.Bool("mine", false, "Mine immediately on the same node")
-
-	switch os.Args[1] {
+	switch os.Args[3] {
 	case "getbalance":
-		err := getBalanceCmd.Parse(os.Args[2:])
+		err := getBalanceCmd.Parse(os.Args[3:])
 		if err != nil {
 			log.Panic(err)
 		}
 
 	case "createwallet":
-		err := createWalletCmd.Parse(os.Args[2:])
+		err := createWalletCmd.Parse(os.Args[3:])
 		if err != nil {
 			log.Panic(err)
 		}
 	case "listaddresses":
-		err := listAddressesCmd.Parse(os.Args[2:])
+		err := listAddressesCmd.Parse(os.Args[3:])
 		if err != nil {
 			log.Panic(err)
 		}
 	case "send":
-		err := sendCmd.Parse(os.Args[2:])
+		err := sendCmd.Parse(os.Args[3:])
 		if err != nil {
 			log.Panic(err)
 		}
