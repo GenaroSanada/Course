@@ -11,7 +11,8 @@
 Your new address: 13qAPhDtk82VdLMcaUoh7jwNi5HpFX6De
 
 ### 使用可执行文件查看钱包地址列表
-./cmd -c account lzhx_ listaddresses
+./cmd -c account lzhx_ listaddresses  
+
 13qAPhDtk82VdLMcaUoh7jwNi5HpFX6De
 1LcubHwTs7AuHGxoPdwttbcbJkrrCwWUYX
 1zmkxjXmisf4kvQJCUnhKRYMbpsXBdPYf
