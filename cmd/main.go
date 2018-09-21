@@ -26,13 +26,14 @@ func main() {
 	listenF := flag.Int("l", 0, "wait for incoming connections[chain mode param]")
 	target := flag.String("d", "", "target peer to dial[chain mode param]")
 	suffix := flag.String("s", "", "wallet suffix [chain mode param]")
+	initAccounts := flag.String("a", "", "init exist accounts whit value 10000")
 	secio := flag.Bool("secio", false, "enable secio[chain mode param]")
 	seed := flag.Int64("seed", 0, "set random seed for id generation[chain mode param]")
 	flag.Parse()
 
 
 	if *command == "chain" {
-		runblockchain(listenF, target, seed, secio, suffix)
+		runblockchain(listenF, target, seed, secio, suffix, initAccounts)
 	}else if *command == "account" {
 		cli := wallet.WalletCli{}
 		cli.Run()
@@ -41,11 +42,11 @@ func main() {
 	}
 }
 
-func runblockchain(listenF *int, target *string, seed *int64, secio *bool, suffix *string){
+func runblockchain(listenF *int, target *string, seed *int64, secio *bool, suffix *string, initAccounts *string){
 	t := time.Now()
 	genesisBlock := blockchain.Block{}
 	defaultAccounts := make(map[string]uint64)
-	defaultAccounts["0x1"] = 10000
+	defaultAccounts[*initAccounts] = 10000
 	genesisBlock = blockchain.Block{0, t.String(), 0, blockchain.CalculateHash(genesisBlock), "", 100,nil, defaultAccounts}
 
 	var blocks []blockchain.Block
