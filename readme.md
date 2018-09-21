@@ -25,6 +25,8 @@ local http server listening on 127.0.0.1:8081
 
 ./cmd -s lzhx_ -c chain -l 8082 -d /ip4/127.0.0.1/tcp/8080/ipfs/QmdhJPDZaLPCFjZMsuLfVtzZMNaZMPp6wT85gYdRnVcppj
 
+两节点正常连接后可在terminal中输入任意数字，该操作将产生新的块并同步块信息到对端节点
+
 ### 查看链状态、发送交易及交易打包
 
 1.通过get形式的http请求查看链信息
@@ -86,8 +88,8 @@ return:
 ```json
     {
       "amount": 1,
-      "recipient": "0x2",
-      "sender": "0x1",
+      "recipient": "17eeNAJcUWECkHLDgGcXwZPKrYteNLq2hm",
+      "sender": "13qAPhDtk82VdLMcaUoh7jwNi5HpFX6De8",
       "data": "bWVzc2FnZQ=="
     }
 ```
@@ -117,14 +119,14 @@ return:
       "transactions": [
         {
           "amount": 1,
-          "recipient": "0x2",
-          "sender": "0x1",
+          "recipient": "17eeNAJcUWECkHLDgGcXwZPKrYteNLq2hm",
+          "sender": "13qAPhDtk82VdLMcaUoh7jwNi5HpFX6De8",
           "data": "bWVzc2FnZQ=="
         }
       ],
       "accounts": {
-        "0x1": 9999,
-        "0x2": 1
+        "13qAPhDtk82VdLMcaUoh7jwNi5HpFX6De8": 9999,
+        "17eeNAJcUWECkHLDgGcXwZPKrYteNLq2hm": 1
       }
     }
 ```
@@ -138,10 +140,10 @@ path:   http://127.0.0.1: &lt; port &gt; /getbalance
 param:
 
 ```json
-    {"Address": "0x2"}
+    {"Address": "17eeNAJcUWECkHLDgGcXwZPKrYteNLq2hm"}
 ```
 
 return:
 ```
-    0
+    1
 ```
