@@ -48,6 +48,10 @@ func runblockchain(listenF *int, target *string, seed *int64, secio *bool, suffi
 	defaultAccounts := make(map[string]uint64)
 
 	if *initAccounts != ""{
+		if wallet.ValidateAddress(*initAccounts) == false {
+			fmt.Println("Invalid address")
+			return
+		}
 		defaultAccounts[*initAccounts] = 10000
 	}
 	genesisBlock = blockchain.Block{0, t.String(), 0, blockchain.CalculateHash(genesisBlock), "", 100,nil, defaultAccounts}

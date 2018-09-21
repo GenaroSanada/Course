@@ -14,6 +14,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/davecgh/go-spew/spew"
 
+	"Course/wallet"
+	"fmt"
 )
 
 func makeMuxRouter() http.Handler {
@@ -49,6 +51,18 @@ func handleWriteTx(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	validate := wallet.Validate_Address(m.From, m.To, m.Value,blockchain.WalletSuffix)
+	if false == validate {
+		fmt.Println("Parameter verification failed")
+		respondWithJSON(w, r, http.StatusCreated, "Parameter verification failed")
+		return
+	}
+	balance := blockchain.BlockchainInstance.GetBalance(m.From)
+	if balance < m.Value {
+		respondWithJSON(w, r, http.StatusCreated, "Insufficient balance")
+		fmt.Println("Insufficient balance")
+		return
+	}
 	tx := blockchain.BlockchainInstance.NewTransaction(m.From, m.To, m.Value, []byte(m.Data))
 	blockchain.BlockchainInstance.AddTxPool(tx)
 
