@@ -45,9 +45,9 @@ return:
          "hash": "f1534392279bddbf9d43dde8701cb5be14b82f76ec6607bf8d6ad557f60f304e",
          "prevhash": "",
          "proof": 100,
-         "transactions": null,
+         "transactions": {},
          "accounts": {
-           "0x1": 10000
+           "13qAPhDtk82VdLMcaUoh7jwNi5HpFX6De": 10000
          }
        },
        {
@@ -58,7 +58,7 @@ return:
          "prevhash": "f1534392279bddbf9d43dde8701cb5be14b82f76ec6607bf8d6ad557f60f304e",
          "proof": 0,
          "transactions": null,
-         "accounts": null
+         "accounts": {}
        }
      ],
      "TxPool": {
@@ -77,7 +77,7 @@ param:
 
 ```json
    {
-    "From": "13qAPhDtk82VdLMcaUoh7jwNi5HpFX6De8",
+    "From": "13qAPhDtk82VdLMcaUoh7jwNi5HpFX6De",
     "To": "17eeNAJcUWECkHLDgGcXwZPKrYteNLq2hm",
     "Value": 100,
     "Data": "message"
@@ -89,7 +89,7 @@ return:
     {
       "amount": 1,
       "recipient": "17eeNAJcUWECkHLDgGcXwZPKrYteNLq2hm",
-      "sender": "13qAPhDtk82VdLMcaUoh7jwNi5HpFX6De8",
+      "sender": "13qAPhDtk82VdLMcaUoh7jwNi5HpFX6De",
       "data": "bWVzc2FnZQ=="
     }
 ```
@@ -125,7 +125,7 @@ return:
         }
       ],
       "accounts": {
-        "13qAPhDtk82VdLMcaUoh7jwNi5HpFX6De8": 9999,
+        "13qAPhDtk82VdLMcaUoh7jwNi5HpFX6De": 9999,
         "17eeNAJcUWECkHLDgGcXwZPKrYteNLq2hm": 1
       }
     }
