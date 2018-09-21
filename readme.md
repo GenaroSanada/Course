@@ -8,12 +8,22 @@
 ### 使用可执行文件生成新账户
 ./cmd -c account lzhx_ createwallet     (lzhx_ 表示钱包后缀)
 
+Your new address: 13qAPhDtk82VdLMcaUoh7jwNi5HpFX6De
+
 ### 使用可执行文件查看钱包地址列表
 ./cmd -c account lzhx_ listaddresses
+13qAPhDtk82VdLMcaUoh7jwNi5HpFX6De
+1LcubHwTs7AuHGxoPdwttbcbJkrrCwWUYX
+1zmkxjXmisf4kvQJCUnhKRYMbpsXBdPYf
+1EaKYX3U3GGjM4NoNXNVhMk7KQ1UKnTXgz
+1Pz7MTSoESDmnQDMaeLijG4qCbsPdvrus6
 
-### 启动链并连接对端节点
+### 启动链并连
+
+接对端节点
 ./cmd -c chain -s lzhx_ -l 8080 -a 13qAPhDtk82VdLMcaUoh7jwNi5HpFX6De
-
+-s 表示 钱包后缀
+-a 表示钱包地址
 
 启动当前节点后日志输出一下信息
 
