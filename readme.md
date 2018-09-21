@@ -14,9 +14,13 @@ Your new address: 13qAPhDtk82VdLMcaUoh7jwNi5HpFX6De
 ./cmd -c account lzhx_ listaddresses  
 
 13qAPhDtk82VdLMcaUoh7jwNi5HpFX6De 
+
 1LcubHwTs7AuHGxoPdwttbcbJkrrCwWUYX 
+
 1zmkxjXmisf4kvQJCUnhKRYMbpsXBdPYf 
+
 1EaKYX3U3GGjM4NoNXNVhMk7KQ1UKnTXgz 
+
 1Pz7MTSoESDmnQDMaeLijG4qCbsPdvrus6 
 
 ### 启动链并连
