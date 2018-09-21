@@ -27,8 +27,11 @@ Your new address: 13qAPhDtk82VdLMcaUoh7jwNi5HpFX6De
 
 接对端节点
 ./cmd -c chain -s lzhx_ -l 8080 -a 13qAPhDtk82VdLMcaUoh7jwNi5HpFX6De
+
 -s 表示 钱包后缀
+
 -a 表示钱包地址
+
 
 启动当前节点后日志输出一下信息
 
