@@ -112,3 +112,19 @@ return:
     }
 ```
 
+
+3.通过post形式的http接口查看账户余额
+e.g
+
+path:   http://127.0.0.1: &lt; port &gt; /getbalance
+
+param:
+
+```json
+    {"Address": "0x2"}
+```
+
+return:
+```
+    0
+```
