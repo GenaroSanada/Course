@@ -2,7 +2,6 @@ package rpc
 
 import (
 	"io"
-	"log"
 	"time"
 	"strconv"
 	"net/http"
@@ -137,7 +136,7 @@ func respondWithJSON(w http.ResponseWriter, r *http.Request, code int, payload i
 func RunHttpServer(port int) error {
 	mux := makeMuxRouter()
 	listentPort := strconv.Itoa(port)
-	log.Println("local http server listening on 127.0.0.1:", listentPort)
+	fmt.Println("local http server listening on 127.0.0.1:"+listentPort)
 	s := &http.Server{
 		Addr:           ":" + listentPort,
 		Handler:        mux,

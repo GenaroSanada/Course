@@ -2,16 +2,20 @@
 
 
 ### 编译可执行文件
-
+项目cmd 目录执行go build
 
 
 ### 使用可执行文件生成新账户
+./cmd -c account lzhx_ createwallet     (lzhx_ 表示钱包后缀)
 
-
+### 使用可执行文件查看钱包地址列表
+./cmd -c account lzhx_ listaddresses
 
 ### 启动链并连接对端节点
+./cmd -c chain -s lzhx_ -l 8080 -a 13qAPhDtk82VdLMcaUoh7jwNi5HpFX6De
 
-
+启动对端节点
+./cmd -s lzhx_ -c chain -l 8082 -d /ip4/127.0.0.1/tcp/8080/ipfs/QmdhJPDZaLPCFjZMsuLfVtzZMNaZMPp6wT85gYdRnVcppj
 
 ### 查看链状态、发送交易及交易打包
 
@@ -62,7 +66,12 @@ path:   http://127.0.0.1: &lt; port &gt; /txpool
 param:
 
 ```json
-    {"From":"0x1","To":"0x2","Value":1,"Data":"message"}
+   {
+    "From": "13qAPhDtk82VdLMcaUoh7jwNi5HpFX6De8",
+    "To": "17eeNAJcUWECkHLDgGcXwZPKrYteNLq2hm",
+    "Value": 100,
+    "Data": "message"
+}
 ```
 
 return:
