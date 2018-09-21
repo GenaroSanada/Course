@@ -14,7 +14,13 @@
 ### 启动链并连接对端节点
 ./cmd -c chain -s lzhx_ -l 8080 -a 13qAPhDtk82VdLMcaUoh7jwNi5HpFX6De
 
-启动对端节点
+
+启动当前节点后日志输出一下信息
+ocal http server listening on 127.0.0.1:8081
+2018/09/21 15:06:20 I am /ip4/127.0.0.1/tcp/8080/ipfs/QmdhJPDZaLPCFjZMsuLfVtzZMNaZMPp6wT85gYdRnVcppj
+2018/09/21 15:06:20 Now run "go run main.go -c chain -l 8082 -d /ip4/127.0.0.1/tcp/8080/ipfs/QmdhJPDZaLPCFjZMsuLfVtzZMNaZMPp6wT85gYdRnVcppj" on a different terminal
+
+在另一个terminal中启动对端节点（加入-s参数表示该节点的钱包后缀名）
 ./cmd -s lzhx_ -c chain -l 8082 -d /ip4/127.0.0.1/tcp/8080/ipfs/QmdhJPDZaLPCFjZMsuLfVtzZMNaZMPp6wT85gYdRnVcppj
 
 ### 查看链状态、发送交易及交易打包
