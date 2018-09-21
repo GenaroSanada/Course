@@ -91,6 +91,14 @@ func (t *Blockchain) LastBlock() Block {
 	return t.Blocks[len(t.Blocks)-1]
 }
 
+func (t *Blockchain) GetBalance(address string) uint64 {
+	accounts := t.LastBlock().Accounts
+	if value, ok := accounts[address]; ok {
+		return value
+	}
+	return 0
+}
+
 
 func (t *Blockchain)PackageTx(newBlock *Block) {
 	(*newBlock).Transactions = t.TxPool.AllTx
