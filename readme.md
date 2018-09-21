@@ -18,7 +18,7 @@
 1.通过get形式的http请求查看链信息
 e.g
 
-path: http://127.0.0.1:&lt;port&gt;
+path: http://127.0.0.1: &lt; port &gt;
 
 return:
 ```json
@@ -57,7 +57,7 @@ return:
 2.通过post形式的http接口发送交易到链上
 e.g
 
-path:   http://127.0.0.1:&lt;port&gt;/txpool
+path:   http://127.0.0.1: &lt; port &gt; /txpool
 
 param:
 
@@ -80,7 +80,7 @@ return:
 3.通过post形式的http接口发送信息产生新块
 e.g
 
-path:   http://127.0.0.1:&lt;port&gt;block
+path:   http://127.0.0.1: &lt; port &gt; /block
 
 param:
 
