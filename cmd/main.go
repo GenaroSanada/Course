@@ -8,15 +8,15 @@ import (
 	"context"
 	"log"
 
-	"Course/blockchain"
-	"Course/rpc"
+	"github.com/GenaroSanada/Course/blockchain"
+	"github.com/GenaroSanada/Course/rpc"
 
 	golog "github.com/ipfs/go-log"
 	peer "github.com/libp2p/go-libp2p-peer"
 	pstore "github.com/libp2p/go-libp2p-peerstore"
 	gologging "github.com/whyrusleeping/go-logging"
 	ma "github.com/multiformats/go-multiaddr"
-	"Course/wallet"
+	"github.com/GenaroSanada/Course/wallet"
 )
 
 func main() {
