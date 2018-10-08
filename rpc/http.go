@@ -91,6 +91,7 @@ func handleWriteBlock(w http.ResponseWriter, r *http.Request) {
 		blockchain.BlockchainInstance.PackageTx(&newBlock)
 	}else {
 		newBlock.Accounts = blockchain.BlockchainInstance.LastBlock().Accounts
+		newBlock.Transactions = make([]blockchain.Transaction,0)
 	}
 
 	if blockchain.IsBlockValid(newBlock, blockchain.BlockchainInstance.Blocks[len(blockchain.BlockchainInstance.Blocks)-1]) {

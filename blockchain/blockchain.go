@@ -308,6 +308,7 @@ func WriteData(rw *bufio.ReadWriter) {
 			BlockchainInstance.PackageTx(&newBlock)
 		}else {
 			newBlock.Accounts = BlockchainInstance.LastBlock().Accounts
+			newBlock.Transactions = make([]Transaction, 0)
 		}
 
 		if IsBlockValid(newBlock, BlockchainInstance.Blocks[len(BlockchainInstance.Blocks)-1]) {
