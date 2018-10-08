@@ -26,6 +26,7 @@ import (
 )
 
 var WalletSuffix string
+const difficulty = 1
 
 // Block represents each 'item' in the blockchain
 type Block struct {
@@ -37,6 +38,8 @@ type Block struct {
 	Proof        uint64           `json:"proof"`
 	Transactions []Transaction `json:"transactions"`
 	Accounts   map[string]uint64  `json:"accounts"`
+	Difficulty int
+	Nonce      string
 }
 
 
@@ -352,4 +355,50 @@ func GenerateBlock(oldBlock Block, Result int) Block {
 	newBlock.Hash = CalculateHash(newBlock)
 
 	return newBlock
+}
+
+
+
+
+// create a new block using previous block's hash
+func generateBlock(oldBlock Block, Result int) Block {
+	var newBlock Block
+
+	t := time.Now()
+
+	newBlock.Index = oldBlock.Index + 1
+	newBlock.Timestamp = t.String()
+	newBlock.Result = Result
+	newBlock.PrevHash = oldBlock.Hash
+	newBlock.Difficulty = difficulty
+
+	for i := 0; ; i++ {
+		hex := fmt.Sprintf("%x", i)
+		newBlock.Nonce = hex
+		if !isHashValid(calculateHash(newBlock), newBlock.Difficulty) {
+			fmt.Println(calculateHash(newBlock), " do more work!")
+			time.Sleep(time.Second)
+			continue
+		} else {
+			fmt.Println(calculateHash(newBlock), " work done!")
+			newBlock.Hash = calculateHash(newBlock)
+			break
+		}
+
+	}
+	return newBlock
+}
+
+func isHashValid(hash string, difficulty int) bool {
+	prefix := strings.Repeat("0", difficulty)
+	return strings.HasPrefix(hash, prefix)
+}
+
+// SHA256 hasing
+func calculateHash(block Block) string {
+	record := strconv.Itoa(block.Index) + block.Timestamp + strconv.Itoa(block.Result) + block.PrevHash + block.Nonce
+	h := sha256.New()
+	h.Write([]byte(record))
+	hashed := h.Sum(nil)
+	return hex.EncodeToString(hashed)
 }

@@ -18,6 +18,7 @@ import (
 	ma "github.com/multiformats/go-multiaddr"
 	"Course/wallet"
 )
+const difficulty = 1
 
 func main() {
 
@@ -54,7 +55,7 @@ func runblockchain(listenF *int, target *string, seed *int64, secio *bool, suffi
 		}
 		defaultAccounts[*initAccounts] = 10000
 	}
-	genesisBlock = blockchain.Block{0, t.String(), 0, blockchain.CalculateHash(genesisBlock), "", 100,nil, defaultAccounts}
+	genesisBlock = blockchain.Block{0, t.String(), 0, blockchain.CalculateHash(genesisBlock), "", 100,nil, defaultAccounts,difficulty, ""}
 
 	var blocks []blockchain.Block
 	blocks = append(blocks, genesisBlock)
