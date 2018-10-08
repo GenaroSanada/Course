@@ -37,9 +37,15 @@ type Block struct {
 	PrevHash  string `json:"prevhash"`
 	Proof        uint64           `json:"proof"`
 	Transactions []Transaction `json:"transactions"`
-	Accounts   map[string]uint64  `json:"accounts"`
+	Accounts   map[string]Account  `json:"accounts"`
 	Difficulty int
 	Nonce      string
+}
+
+
+type Account struct {
+	Balance uint64 `json:"balance"`
+	State   uint64 `json:"state"`
 }
 
 
@@ -97,7 +103,7 @@ func (t *Blockchain) LastBlock() Block {
 func (t *Blockchain) GetBalance(address string) uint64 {
 	accounts := t.LastBlock().Accounts
 	if value, ok := accounts[address]; ok {
-		return value
+		return value.Balance
 	}
 	return 0
 }
@@ -114,17 +120,24 @@ func (t *Blockchain)PackageTx(newBlock *Block) {
 
 	for _, v := range t.TxPool.AllTx{
 		if value, ok := AccountsMap[v.Sender]; ok {
-			if value < v.Amount{
+			if value.Balance < v.Amount{
 				unusedTx = append(unusedTx, v)
 				continue
 			}
-			AccountsMap[v.Sender] = value-v.Amount
+			value.Balance -= v.Amount
+			value.State += 1
+			AccountsMap[v.Sender] = value
 		}
 
 		if value, ok := AccountsMap[v.Recipient]; ok {
-			AccountsMap[v.Recipient] = value + v.Amount
+			value.Balance += v.Amount
+			AccountsMap[v.Recipient] = value
 		}else {
-			AccountsMap[v.Recipient] = v.Amount
+
+			newAccount := new(Account)
+			newAccount.Balance = v.Amount
+			newAccount.State = 0
+			AccountsMap[v.Recipient] = *newAccount
 		}
 	}
 
@@ -156,7 +169,7 @@ func UnLock(){
 
 // makeBasicHost creates a LibP2P host with a random peer ID listening on the
 // given multiaddress. It will use secio if secio is true.
-func MakeBasicHost(listenPort int, secio bool, randseed int64) (host.Host, error) {
+func MakeBasicHost(listenPort int, secio bool, randseed int64, initAccount string) (host.Host, error) {
 
 	// If the seed is zero, use real cryptographic randomness. Otherwise, use a
 	// deterministic randomness source to make generated keys stay the same
@@ -194,9 +207,17 @@ func MakeBasicHost(listenPort int, secio bool, randseed int64) (host.Host, error
 	fullAddr := addr.Encapsulate(hostAddr)
 	log.Printf("I am %s\n", fullAddr)
 	if secio {
-		log.Printf("Now run \"go run main.go -c chain -l %d -d %s -secio\" on a different terminal\n", listenPort+2, fullAddr)
+		if initAccount != "" {
+			log.Printf("Now run \"go run main.go -c chain -l %d -a %s -d %s -secio\" on a different terminal\n", listenPort+2, initAccount, fullAddr)
+		}else {
+			log.Printf("Now run \"go run main.go -c chain -l %d -d %s -secio\" on a different terminal\n", listenPort+2, fullAddr)
+		}
 	} else {
-		log.Printf("Now run \"go run main.go -c chain -l %d -d %s\" on a different terminal\n", listenPort+2, fullAddr)
+		if initAccount != "" {
+			log.Printf("Now run \"go run main.go -c chain -l %d -a %s -d %s\" on a different terminal\n", listenPort+2, initAccount, fullAddr)
+		}else {
+			log.Printf("Now run \"go run main.go -c chain -l %d -d %s\" on a different terminal\n", listenPort+2, fullAddr)
+		}
 	}
 
 	return basicHost, nil
@@ -290,6 +311,7 @@ func WriteData(rw *bufio.ReadWriter) {
 			BlockchainInstance.PackageTx(&newBlock)
 		}else {
 			newBlock.Accounts = BlockchainInstance.LastBlock().Accounts
+			newBlock.Transactions = make([]Transaction, 0)
 		}
 
 		if IsBlockValid(newBlock, BlockchainInstance.Blocks[len(BlockchainInstance.Blocks)-1]) {
