@@ -36,7 +36,12 @@ type Block struct {
 	PrevHash  string `json:"prevhash"`
 	Proof        uint64           `json:"proof"`
 	Transactions []Transaction `json:"transactions"`
-	Accounts   map[string]uint64  `json:"accounts"`
+	Accounts   map[string]Account  `json:"accounts"`
+}
+
+
+type Account struct {
+	Balance uint64 `json:"balance"`
 }
 
 
@@ -94,7 +99,7 @@ func (t *Blockchain) LastBlock() Block {
 func (t *Blockchain) GetBalance(address string) uint64 {
 	accounts := t.LastBlock().Accounts
 	if value, ok := accounts[address]; ok {
-		return value
+		return value.Balance
 	}
 	return 0
 }
@@ -111,17 +116,22 @@ func (t *Blockchain)PackageTx(newBlock *Block) {
 
 	for _, v := range t.TxPool.AllTx{
 		if value, ok := AccountsMap[v.Sender]; ok {
-			if value < v.Amount{
+			if value.Balance < v.Amount{
 				unusedTx = append(unusedTx, v)
 				continue
 			}
-			AccountsMap[v.Sender] = value-v.Amount
+			value.Balance -= v.Amount
+			AccountsMap[v.Sender] = value
 		}
 
 		if value, ok := AccountsMap[v.Recipient]; ok {
-			AccountsMap[v.Recipient] = value + v.Amount
+			value.Balance += v.Amount
+			AccountsMap[v.Recipient] = value
 		}else {
-			AccountsMap[v.Recipient] = v.Amount
+
+			newAccount := new(Account)
+			newAccount.Balance = v.Amount
+			AccountsMap[v.Recipient] = *newAccount
 		}
 	}
 
