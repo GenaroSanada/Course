@@ -42,6 +42,7 @@ type Block struct {
 
 type Account struct {
 	Balance uint64 `json:"balance"`
+	State   uint64 `json:"state"`
 }
 
 
@@ -121,6 +122,7 @@ func (t *Blockchain)PackageTx(newBlock *Block) {
 				continue
 			}
 			value.Balance -= v.Amount
+			value.State += 1
 			AccountsMap[v.Sender] = value
 		}
 
@@ -131,6 +133,7 @@ func (t *Blockchain)PackageTx(newBlock *Block) {
 
 			newAccount := new(Account)
 			newAccount.Balance = v.Amount
+			newAccount.State = 0
 			AccountsMap[v.Recipient] = *newAccount
 		}
 	}
@@ -163,7 +166,7 @@ func UnLock(){
 
 // makeBasicHost creates a LibP2P host with a random peer ID listening on the
 // given multiaddress. It will use secio if secio is true.
-func MakeBasicHost(listenPort int, secio bool, randseed int64) (host.Host, error) {
+func MakeBasicHost(listenPort int, secio bool, randseed int64, initAccount string) (host.Host, error) {
 
 	// If the seed is zero, use real cryptographic randomness. Otherwise, use a
 	// deterministic randomness source to make generated keys stay the same
@@ -201,9 +204,17 @@ func MakeBasicHost(listenPort int, secio bool, randseed int64) (host.Host, error
 	fullAddr := addr.Encapsulate(hostAddr)
 	log.Printf("I am %s\n", fullAddr)
 	if secio {
-		log.Printf("Now run \"go run main.go -c chain -l %d -d %s -secio\" on a different terminal\n", listenPort+2, fullAddr)
+		if initAccount != "" {
+			log.Printf("Now run \"go run main.go -c chain -l %d -a %s -d %s -secio\" on a different terminal\n", listenPort+2, initAccount, fullAddr)
+		}else {
+			log.Printf("Now run \"go run main.go -c chain -l %d -d %s -secio\" on a different terminal\n", listenPort+2, fullAddr)
+		}
 	} else {
-		log.Printf("Now run \"go run main.go -c chain -l %d -d %s\" on a different terminal\n", listenPort+2, fullAddr)
+		if initAccount != "" {
+			log.Printf("Now run \"go run main.go -c chain -l %d -a %s -d %s\" on a different terminal\n", listenPort+2, initAccount, fullAddr)
+		}else {
+			log.Printf("Now run \"go run main.go -c chain -l %d -d %s\" on a different terminal\n", listenPort+2, fullAddr)
+		}
 	}
 
 	return basicHost, nil
