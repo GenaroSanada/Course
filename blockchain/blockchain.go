@@ -40,6 +40,7 @@ type Block struct {
 	Accounts   map[string]Account  `json:"accounts"`
 	Difficulty int
 	Nonce      string
+	Validator string
 }
 
 
@@ -272,7 +273,7 @@ func ReadData(rw *bufio.ReadWriter) {
 }
 
 func WriteData(rw *bufio.ReadWriter) {
-
+	go pos()
 	go func() {
 		for {
 			time.Sleep(5 * time.Second)
@@ -305,7 +306,14 @@ func WriteData(rw *bufio.ReadWriter) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		newBlock := GenerateBlock(BlockchainInstance.Blocks[len(BlockchainInstance.Blocks)-1], _result)
+
+		var address string
+		t := time.Now()
+		address = SHA256Hasing(t.String())
+		//@todo
+		validators[address] = 500
+		fmt.Println(validators)
+		newBlock := GenerateBlock(BlockchainInstance.Blocks[len(BlockchainInstance.Blocks)-1], _result,address)
 
 		if len(BlockchainInstance.TxPool.AllTx) > 0 {
 			BlockchainInstance.PackageTx(&newBlock)
@@ -315,9 +323,8 @@ func WriteData(rw *bufio.ReadWriter) {
 		}
 
 		if IsBlockValid(newBlock, BlockchainInstance.Blocks[len(BlockchainInstance.Blocks)-1]) {
-			mutex.Lock()
-			BlockchainInstance.Blocks = append(BlockchainInstance.Blocks, newBlock)
-			mutex.Unlock()
+			fmt.Println(newBlock)
+			candidateBlocks <- newBlock
 		}
 
 		bytes, err := json.Marshal(BlockchainInstance.Blocks)
@@ -339,6 +346,7 @@ func WriteData(rw *bufio.ReadWriter) {
 
 // make sure block is valid by checking index, and comparing the hash of the previous block
 func IsBlockValid(newBlock, oldBlock Block) bool {
+	return true
 	if oldBlock.Index+1 != newBlock.Index {
 		return false
 	}
@@ -366,7 +374,7 @@ func CalculateHash(block Block) string {
 
 
 // create a new block using previous block's hash
-func GenerateBlock(oldBlock Block, Result int) Block {
+func GenerateBlock(oldBlock Block, Result int,address string) Block {
 	var newBlock Block
 
 	t := time.Now()
@@ -376,7 +384,7 @@ func GenerateBlock(oldBlock Block, Result int) Block {
 	newBlock.Result = Result
 	newBlock.PrevHash = oldBlock.Hash
 	newBlock.Difficulty = difficulty
-
+	newBlock.Validator = address
 	for i := 0; ; i++ {
 		hex := fmt.Sprintf("%x", i)
 		newBlock.Nonce = hex

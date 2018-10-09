@@ -59,7 +59,7 @@ func runblockchain(listenF *int, target *string, seed *int64, secio *bool, suffi
 		defaultAccounts[*initAccounts] = *newAccount
 	}
 
-	genesisBlock = blockchain.Block{0, t.String(), 0, blockchain.CalculateHash(genesisBlock), "", 100,make([]blockchain.Transaction,0), defaultAccounts,difficulty, ""}
+	genesisBlock = blockchain.Block{0, t.String(), 0, blockchain.CalculateHash(genesisBlock), "", 100,make([]blockchain.Transaction,0), defaultAccounts,difficulty, "",""}
 
 	var blocks []blockchain.Block
 	blocks = append(blocks, genesisBlock)
