@@ -101,6 +101,7 @@ func handleWriteBlock(w http.ResponseWriter, r *http.Request) {
 		spew.Dump(blockchain.BlockchainInstance.Blocks)
 	}
 
+	blockchain.BlockchainInstance.WriteDate2File()
 	respondWithJSON(w, r, http.StatusCreated, newBlock)
 
 }

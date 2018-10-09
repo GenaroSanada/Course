@@ -23,9 +23,13 @@ import (
 	host "github.com/libp2p/go-libp2p-host"
 	net "github.com/libp2p/go-libp2p-net"
 	ma "github.com/multiformats/go-multiaddr"
+	"encoding/gob"
+	"github.com/davecgh/go-spew/spew"
+	"path/filepath"
 )
 
 var WalletSuffix string
+var DataFileName string = "chainData.txt"
 
 // Block represents each 'item' in the blockchain
 type Block struct {
@@ -76,6 +80,7 @@ func (p *TxPool)Clear() bool {
 type Blockchain struct {
 	Blocks []Block
 	TxPool *TxPool
+	DataDir string
 }
 
 func (t *Blockchain) NewTransaction(sender string, recipient string, amount uint64, data []byte) *Transaction {
@@ -147,6 +152,52 @@ func (t *Blockchain)PackageTx(newBlock *Block) {
 	}
 
 	(*newBlock).Accounts = AccountsMap
+}
+
+
+func (t *Blockchain)WriteDate2File() {
+	if t.DataDir == "" {
+		return
+	}
+
+	joinPath := filepath.Join(t.DataDir, DataFileName)
+
+	file,err := os.OpenFile(joinPath,os.O_WRONLY|os.O_CREATE,0755)  //以写方式打开文件
+	if err != nil {
+		log.Println("can't write data to file, open file fail err:",err)
+		return
+	}
+	defer file.Close()
+	enc := gob.NewEncoder(file)
+
+	if err := enc.Encode(t); err != nil {
+		log.Fatal("encode error:", err)
+	}
+
+	log.Printf("%s\n", "写入当前数据到数据目录中.")
+}
+
+func (t *Blockchain)ReadDataFromFile() {
+	if t.DataDir == "" {
+		return
+	}
+
+	joinPath := filepath.Join(t.DataDir, DataFileName)
+
+	file,err := os.Open(joinPath)  //以写方式打开文件
+	if err != nil {
+		log.Println("can't read data from file, open file fail err:",err)
+		return
+	}
+	defer file.Close()
+	dec := gob.NewDecoder(file)
+
+	var blockchainInstanceFromFile Blockchain
+	if err := dec.Decode(&blockchainInstanceFromFile); err != nil {
+		log.Fatal("decode error:", err)
+	}
+
+	BlockchainInstance = blockchainInstanceFromFile
 }
 
 var BlockchainInstance Blockchain = Blockchain{
@@ -262,6 +313,8 @@ func ReadData(rw *bufio.ReadWriter) {
 				// Green console color: 	\x1b[32m
 				// Reset console color: 	\x1b[0m
 				fmt.Printf("\x1b[32m%s\x1b[0m> ", string(bytes))
+
+				BlockchainInstance.WriteDate2File()
 			}
 			mutex.Unlock()
 		}
@@ -322,7 +375,8 @@ func WriteData(rw *bufio.ReadWriter) {
 			log.Println(err)
 		}
 
-		//spew.Dump(BlockchainInstance.Blocks)
+		BlockchainInstance.WriteDate2File()
+		spew.Dump(BlockchainInstance.Blocks)
 
 		mutex.Lock()
 		rw.WriteString(fmt.Sprintf("%s\n", string(bytes)))

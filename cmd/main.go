@@ -17,12 +17,14 @@ import (
 	gologging "github.com/whyrusleeping/go-logging"
 	ma "github.com/multiformats/go-multiaddr"
 	"Course/wallet"
+	"os"
 )
 
 func main() {
 
 	// Parse options from the command line
-	command  := flag.String("c", "", "mode[ \"chain\" or \"account\"]")
+	command  := flag.String("c", "", "mode[\"chain\" or \"account\"]")
+	datadir := flag.String("datadir", "", "Data directory for the databases")
 	listenF := flag.Int("l", 0, "wait for incoming connections[chain mode param]")
 	target := flag.String("d", "", "target peer to dial[chain mode param]")
 	suffix := flag.String("s", "", "wallet suffix [chain mode param]")
@@ -33,7 +35,7 @@ func main() {
 
 
 	if *command == "chain" {
-		runblockchain(listenF, target, seed, secio, suffix, initAccounts)
+		runblockchain(listenF, target, seed, secio, suffix, initAccounts, datadir)
 	}else if *command == "account" {
 		cli := wallet.WalletCli{}
 		cli.Run()
@@ -42,7 +44,16 @@ func main() {
 	}
 }
 
-func runblockchain(listenF *int, target *string, seed *int64, secio *bool, suffix *string, initAccounts *string){
+func runblockchain(listenF *int, target *string, seed *int64, secio *bool, suffix *string, initAccounts *string, datadir *string){
+	if *datadir == ""{
+		log.Println("data directory for this node miss，The data of the node will not be stored.")
+	}
+
+	if IsFile(*datadir) {
+		log.Println(fmt.Sprintf("datadir[%s] is a file", *datadir))
+		return
+	}
+
 	t := time.Now()
 	genesisBlock := blockchain.Block{}
 	defaultAccounts := make(map[string]blockchain.Account)
@@ -62,6 +73,10 @@ func runblockchain(listenF *int, target *string, seed *int64, secio *bool, suffi
 	var blocks []blockchain.Block
 	blocks = append(blocks, genesisBlock)
 	blockchain.BlockchainInstance.Blocks =  blocks
+	blockchain.BlockchainInstance.DataDir = *datadir
+
+
+	blockchain.BlockchainInstance.ReadDataFromFile()
 
 	// LibP2P code uses golog to log messages. They log with different
 	// string IDs (i.e. "swarm"). We can control the verbosity level for
@@ -142,4 +157,12 @@ func runblockchain(listenF *int, target *string, seed *int64, secio *bool, suffi
 		select {} // hang forever
 
 	}
+}
+
+func IsFile(f string) bool {
+	fi, e := os.Stat(f)
+	if e != nil {
+		return false
+	}
+	return !fi.IsDir()
 }
