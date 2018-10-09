@@ -363,27 +363,10 @@ func CalculateHash(block Block) string {
 	return hex.EncodeToString(hashed)
 }
 
+
+
 // create a new block using previous block's hash
 func GenerateBlock(oldBlock Block, Result int) Block {
-
-	var newBlock Block
-
-	t := time.Now()
-
-	newBlock.Index = oldBlock.Index + 1
-	newBlock.Timestamp = t.String()
-	newBlock.Result = Result
-	newBlock.PrevHash = oldBlock.Hash
-	newBlock.Hash = CalculateHash(newBlock)
-
-	return newBlock
-}
-
-
-
-
-// create a new block using previous block's hash
-func generateBlock(oldBlock Block, Result int) Block {
 	var newBlock Block
 
 	t := time.Now()
