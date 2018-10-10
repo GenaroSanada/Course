@@ -84,7 +84,9 @@ func handleWriteBlock(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	newBlock := blockchain.GenerateBlock(blockchain.BlockchainInstance.Blocks[len(blockchain.BlockchainInstance.Blocks)-1], m.Msg,"")
+
+	address := blockchain.GenPosAddress()
+	newBlock := blockchain.GenerateBlock(blockchain.BlockchainInstance.Blocks[len(blockchain.BlockchainInstance.Blocks)-1], m.Msg, address)
 
 
 	if len(blockchain.BlockchainInstance.TxPool.AllTx) > 0 {

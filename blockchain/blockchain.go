@@ -326,7 +326,7 @@ func ReadData(rw *bufio.ReadWriter) {
 }
 
 func WriteData(rw *bufio.ReadWriter) {
-	go pos()
+	//go pos()
 	go func() {
 		for {
 			time.Sleep(5 * time.Second)
@@ -360,12 +360,7 @@ func WriteData(rw *bufio.ReadWriter) {
 			log.Fatal(err)
 		}
 
-		var address string
-		t := time.Now()
-		address = SHA256Hasing(t.String())
-		//@todo
-		validators[address] = 500
-		fmt.Println(validators)
+		address := GenPosAddress()
 		newBlock := GenerateBlock(BlockchainInstance.Blocks[len(BlockchainInstance.Blocks)-1], _result,address)
 
 		if len(BlockchainInstance.TxPool.AllTx) > 0 {
@@ -377,7 +372,10 @@ func WriteData(rw *bufio.ReadWriter) {
 
 		if IsBlockValid(newBlock, BlockchainInstance.Blocks[len(BlockchainInstance.Blocks)-1]) {
 			fmt.Println(newBlock)
-			candidateBlocks <- newBlock
+			//candidateBlocks <- newBlock
+			mutex.Lock()
+			BlockchainInstance.Blocks = append(BlockchainInstance.Blocks, newBlock)
+			mutex.Unlock()
 		}
 
 		bytes, err := json.Marshal(BlockchainInstance.Blocks)
@@ -394,6 +392,16 @@ func WriteData(rw *bufio.ReadWriter) {
 		mutex.Unlock()
 	}
 
+}
+
+func GenPosAddress() string {
+	var address string
+	t := time.Now()
+	address = SHA256Hasing(t.String())
+	//@todo
+	validators[address] = 500
+	fmt.Println(validators)
+	return address
 }
 
 
@@ -444,7 +452,7 @@ func GenerateBlock(oldBlock Block, Result int,address string) Block {
 		newBlock.Nonce = hex
 		if !isHashValid(calculateHash(newBlock), newBlock.Difficulty) {
 			fmt.Println(calculateHash(newBlock), " do more work!")
-			time.Sleep(time.Second)
+			//time.Sleep(time.Second)
 			continue
 		} else {
 			fmt.Println(calculateHash(newBlock), " work done!")
