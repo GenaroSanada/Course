@@ -327,7 +327,8 @@ func ReadData(rw *bufio.ReadWriter) {
 }
 
 func WriteData(rw *bufio.ReadWriter) {
-	go pos()
+	//pos 内容
+	//go pos()
 	go func() {
 		for {
 			time.Sleep(5 * time.Second)
@@ -372,13 +373,15 @@ func WriteData(rw *bufio.ReadWriter) {
 		}
 
 		if IsBlockValid(newBlock, BlockchainInstance.Blocks[len(BlockchainInstance.Blocks)-1]) {
-			candidateBlocks <- newBlock
-			/*mutex.Lock()
+			//pow 内容
+			mutex.Lock()
 			BlockchainInstance.Blocks = append(BlockchainInstance.Blocks, newBlock)
-			mutex.Unlock()*/
+			mutex.Unlock()
+			//pos 内容
+			//candidateBlocks <- newBlock
 		}
-
-		<-hasbeenValid
+		//pos 内容
+		//<-hasbeenValid
 
 		bytes, err := json.Marshal(BlockchainInstance.Blocks)
 		if err != nil {
@@ -456,6 +459,7 @@ func GenerateBlock(oldBlock Block, Result int,address string) Block {
 	newBlock.PrevHash = oldBlock.Hash
 	newBlock.Difficulty = difficulty
 	newBlock.Validator = address
+	//pow 内容
 	for i := 0; ; i++ {
 		hex := fmt.Sprintf("%x", i)
 		newBlock.Nonce = hex
