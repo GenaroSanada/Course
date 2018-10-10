@@ -11,10 +11,10 @@ import (
 
 
 	"github.com/gorilla/mux"
-	"github.com/davecgh/go-spew/spew"
 
 	"Course/wallet"
 	"fmt"
+	"log"
 )
 
 func makeMuxRouter() http.Handler {
@@ -100,7 +100,15 @@ func handleWriteBlock(w http.ResponseWriter, r *http.Request) {
 		blockchain.Lock()
 		blockchain.BlockchainInstance.Blocks = append(blockchain.BlockchainInstance.Blocks, newBlock)
 		blockchain.UnLock()
-		spew.Dump(blockchain.BlockchainInstance.Blocks)
+
+
+		b, err := json.MarshalIndent(blockchain.BlockchainInstance.Blocks, "", "  ")
+		if err != nil {
+			log.Fatal(err)
+		}
+		// Green console color: 	\x1b[32m
+		// Reset console color: 	\x1b[0m
+		fmt.Printf("\x1b[32m%s\x1b[0m ", string(b))
 	}
 
 	blockchain.BlockchainInstance.WriteDate2File()
