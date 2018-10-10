@@ -16,6 +16,10 @@ var tempBlocks []Block
 var candidateBlocks = make(chan Block)
 
 
+
+var hasbeenValid = make(chan int, 1)
+
+
 // validators keeps track of open validators and balances
 var validators = make(map[string]int)
 
@@ -82,6 +86,7 @@ func pickWinner() {
 				mutex.Lock()
 				BlockchainInstance.Blocks = append(BlockchainInstance.Blocks, block)
 				mutex.Unlock()
+				hasbeenValid<-1
 				break
 			}
 		}

@@ -179,7 +179,7 @@ func (t *Blockchain)WriteDate2File() {
 	}
 
 	fmt.Println()
-	fmt.Printf("\n%sfile:%s\n>", "已配置数据存储目录，写入当前数据到存储目录中.", t.DataDir+DataFileName)
+	fmt.Printf("\n%sfile:%s\n>", "已配置数据存储目录，写入当前数据到存储目录中.", filepath.Join(t.DataDir,DataFileName))
 }
 
 func (t *Blockchain)ReadDataFromFile() {
@@ -378,13 +378,14 @@ func WriteData(rw *bufio.ReadWriter) {
 			mutex.Unlock()*/
 		}
 
+		<-hasbeenValid
+
 		bytes, err := json.Marshal(BlockchainInstance.Blocks)
 		if err != nil {
 			log.Println(err)
 		}
 
 		BlockchainInstance.WriteDate2File()
-		//spew.Dump(BlockchainInstance.Blocks)
 
 		b, err := json.MarshalIndent(BlockchainInstance.Blocks, "", "  ")
 		if err != nil {
