@@ -420,29 +420,18 @@ func GenPosAddress() string {
 
 // make sure block is valid by checking index, and comparing the hash of the previous block
 func IsBlockValid(newBlock, oldBlock Block) bool {
-	return true
+	//return true
 	if oldBlock.Index+1 != newBlock.Index {
 		return false
 	}
-
 	if oldBlock.Hash != newBlock.PrevHash {
 		return false
 	}
-
 	if CalculateHash(newBlock) != newBlock.Hash {
 		return false
 	}
 
 	return true
-}
-
-// SHA256 hashing
-func CalculateHash(block Block) string {
-	record := strconv.Itoa(block.Index) + block.Timestamp + strconv.Itoa(block.Result) + block.PrevHash
-	h := sha256.New()
-	h.Write([]byte(record))
-	hashed := h.Sum(nil)
-	return hex.EncodeToString(hashed)
 }
 
 
@@ -459,17 +448,19 @@ func GenerateBlock(oldBlock Block, Result int,address string) Block {
 	newBlock.PrevHash = oldBlock.Hash
 	newBlock.Difficulty = difficulty
 	newBlock.Validator = address
+	//pos 内容
+	//newBlock.Hash = CalculateHash(newBlock)
 	//pow 内容
 	for i := 0; ; i++ {
 		hex := fmt.Sprintf("%x", i)
 		newBlock.Nonce = hex
-		if !isHashValid(calculateHash(newBlock), newBlock.Difficulty) {
-			fmt.Println(calculateHash(newBlock), " do more work!")
+		if !isHashValid(CalculateHash(newBlock), newBlock.Difficulty) {
+			fmt.Println(CalculateHash(newBlock), " do more work!")
 			//time.Sleep(time.Second)
 			continue
 		} else {
-			fmt.Println(calculateHash(newBlock), " work done!")
-			newBlock.Hash = calculateHash(newBlock)
+			fmt.Println(CalculateHash(newBlock), " work done!")
+			newBlock.Hash = CalculateHash(newBlock)
 			break
 		}
 
@@ -483,7 +474,7 @@ func isHashValid(hash string, difficulty int) bool {
 }
 
 // SHA256 hasing
-func calculateHash(block Block) string {
+func CalculateHash(block Block) string {
 	record := strconv.Itoa(block.Index) + block.Timestamp + strconv.Itoa(block.Result) + block.PrevHash + block.Nonce
 	h := sha256.New()
 	h.Write([]byte(record))
