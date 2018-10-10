@@ -15,9 +15,6 @@ var tempBlocks []Block
 // candidateBlocks handles incoming blocks for validation
 var candidateBlocks = make(chan Block)
 
-// announcements broadcasts winning validator to all nodes
-var announcements = make(chan string)
-
 
 // validators keeps track of open validators and balances
 var validators = make(map[string]int)
@@ -42,7 +39,7 @@ func pos()  {
 // pickWinner creates a lottery pool of validators and chooses the validator who gets to forge a block to the blockchain
 // by random selecting from the pool, weighted by amount of tokens staked
 func pickWinner() {
-	time.Sleep(15 * time.Second)
+	time.Sleep(1 * time.Second)
 	mutex.Lock()
 	temp := tempBlocks
 	mutex.Unlock()
@@ -85,9 +82,6 @@ func pickWinner() {
 				mutex.Lock()
 				BlockchainInstance.Blocks = append(BlockchainInstance.Blocks, block)
 				mutex.Unlock()
-				for _ = range validators {
-					announcements <- "\nwinning validator: " + lotteryWinner + "\n"
-				}
 				break
 			}
 		}
