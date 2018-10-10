@@ -189,6 +189,10 @@ func (t *Blockchain)ReadDataFromFile() {
 
 	joinPath := filepath.Join(t.DataDir, DataFileName)
 
+	if !IsExist(joinPath) {
+		return
+	}
+
 	file,err := os.Open(joinPath)  //以写方式打开文件
 	if err != nil {
 		log.Println("can't read data from file, open file fail err:",err)
@@ -480,4 +484,12 @@ func CalculateHash(block Block) string {
 	h.Write([]byte(record))
 	hashed := h.Sum(nil)
 	return hex.EncodeToString(hashed)
+}
+
+func IsExist(file string) bool {
+	fi, e := os.Stat(file)
+	if e != nil {
+		return os.IsExist(e)
+	}
+	return !fi.IsDir()
 }
