@@ -24,7 +24,7 @@ import (
 	net "github.com/libp2p/go-libp2p-net"
 	ma "github.com/multiformats/go-multiaddr"
 	"encoding/gob"
-	"github.com/davecgh/go-spew/spew"
+	//"github.com/davecgh/go-spew/spew"
 	"path/filepath"
 )
 
@@ -178,7 +178,8 @@ func (t *Blockchain)WriteDate2File() {
 		log.Fatal("encode error:", err)
 	}
 
-	log.Printf("%s\n", "写入当前数据到数据目录中.")
+	fmt.Println()
+	fmt.Printf("\n%sfile:%s\n>", "已配置数据存储目录，写入当前数据到存储目录中.", t.DataDir+DataFileName)
 }
 
 func (t *Blockchain)ReadDataFromFile() {
@@ -384,7 +385,15 @@ func WriteData(rw *bufio.ReadWriter) {
 		}
 
 		BlockchainInstance.WriteDate2File()
-		spew.Dump(BlockchainInstance.Blocks)
+		//spew.Dump(BlockchainInstance.Blocks)
+
+		b, err := json.MarshalIndent(BlockchainInstance.Blocks, "", "  ")
+		if err != nil {
+			log.Fatal(err)
+		}
+		// Green console color: 	\x1b[32m
+		// Reset console color: 	\x1b[0m
+		fmt.Printf("\x1b[32m%s\x1b[0m ", string(b))
 
 		mutex.Lock()
 		rw.WriteString(fmt.Sprintf("%s\n", string(bytes)))
