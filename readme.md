@@ -26,11 +26,13 @@ Your new address: 13qAPhDtk82VdLMcaUoh7jwNi5HpFX6De
 ### 启动链并连
 
 接对端节点
-./cmd -c chain -s lzhx_ -l 8080 -a 13qAPhDtk82VdLMcaUoh7jwNi5HpFX6De
+./cmd -c chain -s lzhx_ -l 8080 -a 13qAPhDtk82VdLMcaUoh7jwNi5HpFX6De -datadir /Users/username/goworkspace/src/Course/cmd
 
 -s 表示 钱包后缀
 
 -a 表示钱包地址
+
+-datadir 表示数据存储目录，该参数为可选参数(该参数存在时，链数据将从指定目录存储和读取)
 
 
 启动当前节点后日志输出一下信息
