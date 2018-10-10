@@ -261,15 +261,15 @@ func MakeBasicHost(listenPort int, secio bool, randseed int64, initAccount strin
 	log.Printf("I am %s\n", fullAddr)
 	if secio {
 		if initAccount != "" {
-			log.Printf("Now run \"go run main.go -c chain -l %d -a %s -d %s -secio\" on a different terminal\n", listenPort+2, initAccount, fullAddr)
+			log.Printf("Now run \"go run main.go \x1b[32m -c chain -l %d -a %s -d %s -secio\x1b[0m\" on a different terminal\n", listenPort+2, initAccount, fullAddr)
 		}else {
-			log.Printf("Now run \"go run main.go -c chain -l %d -d %s -secio\" on a different terminal\n", listenPort+2, fullAddr)
+			log.Printf("Now run \"go run main.go \x1b[32m -c chain -l %d -d %s -secio\x1b[0m\" on a different terminal\n", listenPort+2, fullAddr)
 		}
 	} else {
 		if initAccount != "" {
-			log.Printf("Now run \"go run main.go -c chain -l %d -a %s -d %s\" on a different terminal\n", listenPort+2, initAccount, fullAddr)
+			log.Printf("Now run \"go run main.go \x1b[32m -c chain -l %d -a %s -d %s\x1b[0m\" on a different terminal\n", listenPort+2, initAccount, fullAddr)
 		}else {
-			log.Printf("Now run \"go run main.go -c chain -l %d -d %s\" on a different terminal\n", listenPort+2, fullAddr)
+			log.Printf("Now run \"go run main.go \x1b[32m -c chain -l %d -d %s\x1b[0m\" on a different terminal\n", listenPort+2, fullAddr)
 		}
 	}
 

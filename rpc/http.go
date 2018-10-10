@@ -148,7 +148,7 @@ func respondWithJSON(w http.ResponseWriter, r *http.Request, code int, payload i
 func RunHttpServer(port int) error {
 	mux := makeMuxRouter()
 	listentPort := strconv.Itoa(port)
-	fmt.Println("local http server listening on 127.0.0.1:"+listentPort)
+	fmt.Printf("\nlocal http server listening on \x1b[32m127.0.0.1:%s\x1b[0m\n\n",listentPort)
 	s := &http.Server{
 		Addr:           ":" + listentPort,
 		Handler:        mux,
